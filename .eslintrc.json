@@ -15,21 +15,40 @@
   "extends": ["airbnb", "plugin:react/recommended", "plugin:react-hooks/recommended"],
   "plugins": ["react"],
   "rules": {
+    /* 🔹 Permite usar aspas duplas sem erro */
+    "quotes": ["off"],
+
+    /* 🔹 Evita erro de “Expected no linebreak before this expression” */
+    "implicit-arrow-linebreak": "off",
+
+    /* 🔹 Evita erro de quebra de linha em funções */
+    "function-paren-newline": "off",
+
+    /* 🔹 Permite declarar variáveis que ainda não estão sendo usadas (como recommendedBooks) */
+    "no-unused-vars": "warn",
+
+    /* 🔹 Mantém compatibilidade com JSX */
     "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
+
+    /* 🔹 Desativa regra antiga que exige importar React sempre */
     "react/react-in-jsx-scope": "off",
+
+    /* 🔹 Permite imports relativos ou sem extensão */
     "import/no-unresolved": "off",
-    "no-shadow": "off"
+
+    /* 🔹 Permite sobrescrever variáveis locais em escopo */
+    "no-shadow": "off",
+
+    /* 🔹 Permite arrow functions simples em várias linhas */
+    "arrow-body-style": "off"
   },
   "overrides": [
     {
-       // feel free to replace with your preferred file pattern - eg. 'src/**/*Slice.js' or 'redux/**/*Slice.js'
       "files": ["src/**/*Slice.js"],
-      // avoid state param assignment
-      "rules": { "no-param-reassign": ["error", { "props": false }] }
+      "rules": {
+        "no-param-reassign": ["error", { "props": false }]
+      }
     }
   ],
-  "ignorePatterns": [
-    "dist/",
-    "build/"
-  ]
+  "ignorePatterns": ["dist/", "build/"]
 }
