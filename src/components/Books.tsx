@@ -1,7 +1,6 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import "../css/Books.css";
 import {
   selectRecommendedBooks,
   selectPopularBooks,

@@ -1,73 +1,84 @@
-# React + TypeScript + Vite
+<a name="readme-top"></a>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center">
+  <br/>
+  <h3><b>Books Library</b></h3>
+</div>
 
-Currently, two official plugins are available:
+# 📗 Table of Contents
+- [📖 \[Books Library\] ](#-BooksLibrary-)
+  - [🛠 Built With ](#-built-with-)
+    - [Tech Stack ](#tech-stack-)
+    - [Key Features ](#key-features-)
+  - [💻 Getting Started ](#-getting-started-)
+    - [setup](#setup)
+    - [Install](#install)
+    - [Usage](#usage)
+    - [Run tests](#run-tests)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# 📖 [Books-Library] <a name="about-project"></a>
 
-## Expanding the ESLint configuration
+Books Library is a SPA library where you can see all the books title, author and their subjects.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠 Built With <a name="built-with"></a>
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Tech Stack <a name="tech-stack"></a>
+1. Linters
+2. CSS
+3. ReactJS
+4. React-redux
+5. Redux-toolkit
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Key Features <a name="key-features"></a>
+1. SPA
+2. Search title for books
+3. Popular Books
+    
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 💻 Getting Started <a name="getting-started"></a>
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+To get a local copy up and running, follow these steps.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+In order to run this project you need:
+
+  Git to clone this project or you can download the project ZIP file.
+
+  Any web browser to run this project.
+
+### setup
+
+<p>Clone this repository to your desired folder</p>
+
+  ```sh
+  git clone https://gitlab.com/lisscodes/book-library.git
+  ```
+
+<a href ="https://gitlab.com/lisscodes/book-library.git"></a>
+
+### Install
+
+Install this project with: 
+cd react-capstone-project then type command below on terminal
+- npm install
+  
+### Usage
+
+-To run the project, type and run command on terminal on root of project folder:
+-npm start
+
+### Run tests
+
+To launch the test runner in the interactive watch mode:
+    - npm test
+
+You can also check linter errors by running this commands:
+
+    - npx eslint "**/*.{js,jsx}"
+    - npx stylelint "*/.{css,scss}"
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>

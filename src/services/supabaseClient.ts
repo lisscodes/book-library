@@ -1,19 +1,7 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
+const supabaseUrl = "https://ftzjtnelcmbbczpkrigd.supabase.co";
+const supabaseKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0emp0bmVsY21iYmN6cGtyaWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2OTA2MDksImV4cCI6MjA3NTI2NjYwOX0.jSo_BfKXDWPwHex-pEJkQGsS-QvUPG9sD7RdyBufl3o";
 
-// 🔒 Recomendado: usar variáveis de ambiente (.env)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-// fallback opcional (somente em dev)
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn(
-    "⚠️ Supabase credentials are missing. Check your .env or Vite environment variables."
-  );
-}
-
-// ✅ Criação tipada do client
-export const supabase: SupabaseClient = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+export const supabase = createClient(supabaseUrl, supabaseKey);

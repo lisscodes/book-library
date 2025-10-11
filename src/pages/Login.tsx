@@ -21,6 +21,7 @@ export default function Login() {
         : await signIn(email, password);
       dispatch(setSession(data.session ?? null));
       navigate("/");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       dispatch(setError(err.message));
     } finally {

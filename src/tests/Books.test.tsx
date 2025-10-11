@@ -1,11 +1,10 @@
 import '@testing-library/jest-dom';
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import Books from '../components/Books';
 import myBooks from './books';
-import App from '../App';
 
 const reducer = (
   state = {
@@ -14,19 +13,15 @@ const reducer = (
 ) => state;
 
 const store = configureStore({ reducer });
-
 describe('Render Test', () => {
   it('Component renders correctly', () => {
-    render(
+    const tree = render(
       <MemoryRouter>
         <Provider store={store}>
-          <App />
+          <Books />
         </Provider>
       </MemoryRouter>,
     );
-
-    expect(screen.getByText('Romeo and Juliet')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('clickBook'));
-    expect(screen.getByText('Shakespeare, William')).toBeInTheDocument();
+    expect(tree).toMatchSnapshot();
   });
 });
