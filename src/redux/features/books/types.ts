@@ -16,4 +16,5 @@ export interface BooksState {
   isLoading: boolean;
   searchQuery: string;
   error: string | null;
+  selectedBook: Book | null;
 }

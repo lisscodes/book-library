@@ -1,21 +1,50 @@
 import { supabase } from "./supabaseClient";
+import type { Session, User } from "@supabase/supabase-js";
 
-export async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) throw error;
-  return data;
+interface AuthResponse {
+  user: User | null;
+  session: Session | null;
+  message?: string;
 }
 
-export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+export async function signUp(email: string, password: string): Promise<AuthResponse> {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPassword = password.trim();
+
+  const { data, error } = await supabase.auth.signUp({
+    email: cleanEmail,
+    password: cleanPassword,
   });
-  if (error) throw error;
-  return data;
+
+  if (error) {
+    console.error("[AuthService] signUp error:", error.message);
+    throw new Error("Erro ao criar conta. Tente novamente.");
+  }
+
+  return { user: data.user, session: data.session };
 }
 
-export async function signOut() {
+export async function signIn(email: string, password: string): Promise<AuthResponse> {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPassword = password.trim();
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: cleanEmail,
+    password: cleanPassword,
+  });
+
+  if (error) {
+    console.error("[AuthService] signIn error:", error.message);
+    throw new Error("Credenciais inválidas ou conta inexistente.");
+  }
+
+  return { user: data.user, session: data.session };
+}
+
+export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  if (error) {
+    console.error("[AuthService] signOut error:", error.message);
+    throw new Error("Erro ao encerrar sessão.");
+  }
 }

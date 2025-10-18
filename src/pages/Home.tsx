@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import BookCard from "../components/BookCard";
+import { BookSkeleton } from "../components/BookSkeleton";
 import { fetchBooks } from "../redux/features/books/thunks";
 import type { RootState, AppDispatch } from "../redux/store";
 
@@ -15,6 +16,7 @@ const Home: React.FC = () => {
   );
 
   useEffect(() => {
+    console.log("Disparando fetchBooks()");
     dispatch(fetchBooks());
   }, [dispatch]);
 
@@ -34,20 +36,79 @@ const Home: React.FC = () => {
   const recommendedBooks = filteredBooks.slice(0, 8);
   const popularBooks = filteredBooks.slice(8, 16);
 
-  if (isLoading)
+  // 🔹 Esqueleto de carregamento
+  if (isLoading || books.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <p className="text-gray-600 animate-pulse">Carregando livros...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="p-6">
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+              Recommendation
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <BookSkeleton key={i} />
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Popular</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <BookSkeleton key={i} />
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
     );
+  }
 
-  if (error)
+  // 🔹 Esqueleto + mensagem de erro
+  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <p className="text-red-500">Erro ao carregar livros 😢</p>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="p-6 flex flex-col items-center justify-center">
+          <div className="w-full mb-6">
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">
+                Recommendation
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <BookSkeleton key={i} />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Popular</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <BookSkeleton key={i} />
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <p className="text-red-500 text-center mb-3">
+            O servidor de livros está temporariamente fora do ar 😢
+          </p>
+          <button
+            onClick={() => dispatch(fetchBooks())}
+            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition"
+          >
+            Tentar novamente
+          </button>
+        </div>
       </div>
     );
+  }
 
+  // 🔹 Conteúdo normal
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
