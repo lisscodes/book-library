@@ -9,12 +9,13 @@ export const fetchWaitlist = createAsyncThunk<WaitlistEntry[]>(
   }
 );
 
-export const joinWaitlist = createAsyncThunk<WaitlistEntry, { user_id: string; book_id: string }>(
-  "waitlist/join",
-  async ({ user_id, book_id }) => {
-    return await waitlistService.joinWaitlist(user_id, book_id);
-  }
-);
+export const joinWaitlist = createAsyncThunk<
+  WaitlistEntry,
+  { user_id: string; book_id: string }
+>("waitlist/join", async ({ user_id, book_id }) => {
+  const data = await waitlistService.joinWaitlist(user_id, book_id);
+  return data;
+});
 
 export const removeWaitlist = createAsyncThunk<string, string>(
   "waitlist/remove",

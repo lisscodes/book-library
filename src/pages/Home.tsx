@@ -1,10 +1,11 @@
-import React, { useEffect, useCallback, useMemo } from "react";
+import React, { useEffect, useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
 import BookCard from "../components/BookCard";
 import { BookSkeleton } from "../components/BookSkeleton";
 import { fetchBooks } from "../redux/features/books/thunks";
+import { setQuery } from "../redux/features/books/slice";
+import { Search } from "lucide-react";
 import type { RootState, AppDispatch } from "../redux/store";
 
 const Home: React.FC = () => {
@@ -15,10 +16,19 @@ const Home: React.FC = () => {
     (state: RootState) => state.books
   );
 
+  const [search, setSearch] = useState(searchQuery);
+
   useEffect(() => {
-    console.log("Disparando fetchBooks()");
-    dispatch(fetchBooks());
-  }, [dispatch]);
+    if (!books.length && !isLoading && !error) {
+      dispatch(fetchBooks());
+    }
+  }, [dispatch, books.length, isLoading, error]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    dispatch(setQuery(value));
+  };
 
   const filteredBooks = useMemo(
     () =>
@@ -35,13 +45,34 @@ const Home: React.FC = () => {
 
   const recommendedBooks = filteredBooks.slice(0, 8);
   const popularBooks = filteredBooks.slice(8, 16);
+  const shouldRenderSkeleton = (!books.length || isLoading) && !error;
 
-  // 🔹 Esqueleto de carregamento
-  if (isLoading || books.length === 0) {
+  // 🔹 Skeleton de carregamento
+  if (shouldRenderSkeleton) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="p-6">
+          {/* Saudação */}
+          <div className="pt-4 pb-2 text-gray-800 md:hidden">
+            <h2 className="text-lg font-semibold">
+              Hello, <span className="text-blue-600">Dear 👋</span>
+            </h2>
+          </div>
+
+          {/* Barra de busca no mobile */}
+          <div className="md:hidden mb-4">
+            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 shadow-sm">
+              <Search className="text-gray-500 mr-2" size={18} />
+              <input
+                type="text"
+                value={search}
+                onChange={handleInputChange}
+                placeholder="Buscar livros..."
+                className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+              />
+            </div>
+          </div>
+
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-800">
               Recommendation
@@ -66,34 +97,11 @@ const Home: React.FC = () => {
     );
   }
 
-  // 🔹 Esqueleto + mensagem de erro
+  // 🔹 Estado de erro
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="p-6 flex flex-col items-center justify-center">
-          <div className="w-full mb-6">
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                Recommendation
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <BookSkeleton key={i} />
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">Popular</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <BookSkeleton key={i} />
-                ))}
-              </div>
-            </section>
-          </div>
-
           <p className="text-red-500 text-center mb-3">
             O servidor de livros está temporariamente fora do ar 😢
           </p>
@@ -110,9 +118,30 @@ const Home: React.FC = () => {
 
   // 🔹 Conteúdo normal
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
       <div className="p-6">
+        {/* Saudação */}
+        <div className="pt-4 pb-2 text-gray-800 md:hidden">
+          <h2 className="text-lg font-semibold">
+            Hello, <span className="text-blue-600">Dear 👋</span>
+          </h2>
+        </div>
+
+        {/* Barra de busca (mobile apenas) */}
+        <div className="md:hidden mb-4">
+          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 shadow-sm">
+            <Search className="text-gray-500 mr-2" size={18} />
+            <input
+              type="text"
+              value={search}
+              onChange={handleInputChange}
+              placeholder="Buscar livros..."
+              className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+            />
+          </div>
+        </div>
+
+        {/* Recommendation */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">
             Recommendation
@@ -129,6 +158,7 @@ const Home: React.FC = () => {
           </div>
         </section>
 
+        {/* Popular */}
         <section>
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Popular</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

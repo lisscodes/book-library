@@ -4,7 +4,7 @@ import type { BooksState, Book } from "./types";
 
 const initialState: BooksState = {
   books: [],
-  isLoading: true,
+  isLoading: false,
   searchQuery: "",
   error: null,
   selectedBook: null,

@@ -1,23 +1,150 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../redux/store";
 import { fetchBookById } from "../redux/features/books/thunks";
+import { createLoan } from "../redux/features/loans/thunks";
+import { joinWaitlist } from "../redux/features/waitList/thunks";
+import { toggleFavorite } from "../redux/features/favorites/thunks";
+import { toast } from "react-toastify";
+import { supabase } from "../services/supabaseClient";
 
 export default function BookDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   const { selectedBook: book, isLoading, error } = useSelector(
     (state: RootState) => state.books
   );
 
+  // 🔹 Buscar detalhes do livro
   useEffect(() => {
     if (id) {
       dispatch(fetchBookById(Number(id)));
     }
   }, [dispatch, id]);
 
+  // ======================================================
+  // 🔹 Empréstimo
+  // ======================================================
+  const handleLoan = async () => {
+  if (!book) return;
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    toast.error("É necessário estar logado para emprestar livros.");
+    console.error("Usuário não autenticado:", authError);
+    return;
+  }
+
+  console.log("📚 Tentando criar empréstimo para:", book.id, "por usuário:", user.id);
+
+  dispatch(
+    createLoan({
+      user_id: user.id,
+      book_id: String(book.id),
+    })
+  )
+    .unwrap()
+    .then((res) => {
+      console.log("Empréstimo criado com sucesso:", res);
+      toast.success("Livro emprestado com sucesso!");
+      navigate("/loans");
+    })
+    .catch((err) => {
+      console.error("Erro ao criar empréstimo:", err);
+
+      const message = err?.message || err;
+
+      if (typeof message === "string" && message.includes("já está emprestado")) {
+        toast.warning("Você já possui um empréstimo ativo deste livro.");
+      } else {
+        toast.error("Falha ao registrar o empréstimo. Tente novamente mais tarde.");
+      }
+    });
+};
+
+  // ======================================================
+  // 🔹 Lista de Espera
+  // ======================================================
+  const handleWaitlist = async () => {
+    if (!book) return;
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      toast.error("É necessário estar logado para entrar na lista de espera.");
+      console.error("Usuário não autenticado:", authError);
+      return;
+    }
+
+    console.log("🕒 Tentando adicionar à lista de espera:", book.id);
+
+    dispatch(
+      joinWaitlist({
+        user_id: user.id,
+        book_id: String(book.id),
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        console.log("✅ Adicionado à lista de espera:", res);
+        toast.info("🕒 Livro adicionado à lista de espera!");
+        navigate("/waitlist");
+      })
+      .catch((err) => {
+        console.error("❌ Erro ao adicionar à lista de espera:", err);
+        toast.error("Falha ao entrar na lista de espera.");
+      });
+  };
+
+  // ======================================================
+  // 🔹 Favoritar
+  // ======================================================
+  const handleFavorite = async () => {
+    if (!book) return;
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      toast.error("É necessário estar logado para favoritar livros.");
+      console.error("Usuário não autenticado:", authError);
+      return;
+    }
+
+    console.log("💜 Tentando favoritar livro:", book.id);
+
+    dispatch(
+      toggleFavorite({
+        user_id: user.id,
+        book_id: String(book.id),
+      })
+    )
+      .unwrap()
+      .then((res) => {
+        console.log("✅ Favorito atualizado:", res);
+        toast.success("💜 Favoritos atualizados!");
+      })
+      .catch((err) => {
+        console.error("❌ Erro ao atualizar favorito:", err);
+        toast.error("Falha ao atualizar favorito.");
+      });
+  };
+
+  // ======================================================
+  // 🔹 Estados de carregamento e erro
+  // ======================================================
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-purple-100">
@@ -31,9 +158,7 @@ export default function BookDetails() {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-purple-100">
-        <p className="text-red-600 text-lg font-semibold">
-          Erro: {error}
-        </p>
+        <p className="text-red-600 text-lg font-semibold">Erro: {error}</p>
       </div>
     );
   }
@@ -48,6 +173,9 @@ export default function BookDetails() {
     );
   }
 
+  // ======================================================
+  // 🔹 Renderização principal
+  // ======================================================
   const coverUrl =
     book.formats["image/jpeg"] ||
     "https://via.placeholder.com/150x220?text=Sem+Capa";
@@ -76,13 +204,24 @@ export default function BookDetails() {
         )}
 
         <div className="flex justify-center gap-4 mt-6">
-          <button className="bg-purple-600 text-white px-6 py-2 rounded-xl hover:bg-purple-700 transition">
+          <button
+            onClick={handleLoan}
+            className="bg-purple-600 text-white px-6 py-2 rounded-xl hover:bg-purple-700 transition"
+          >
             📚 Emprestar
           </button>
-          <button className="bg-yellow-500 text-white px-6 py-2 rounded-xl hover:bg-yellow-600 transition">
+
+          <button
+            onClick={handleWaitlist}
+            className="bg-yellow-500 text-white px-6 py-2 rounded-xl hover:bg-yellow-600 transition"
+          >
             🕒 Lista de espera
           </button>
-          <button className="border-2 border-purple-500 text-purple-700 px-6 py-2 rounded-xl hover:bg-purple-50 transition">
+
+          <button
+            onClick={handleFavorite}
+            className="border-2 border-purple-500 text-purple-700 px-6 py-2 rounded-xl hover:bg-purple-50 transition"
+          >
             💜 Favoritar
           </button>
         </div>
