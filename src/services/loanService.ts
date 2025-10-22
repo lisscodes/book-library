@@ -1,23 +1,15 @@
 import { supabase } from "./supabaseClient";
 
-/**
- * Buscar todos os empréstimos do usuário atual.
- * Recupera detalhes do livro da API Gutendex.
- */
 export async function getLoans() {
-  console.log("📥 Requisitando lista de empréstimos do usuário...");
+  console.log("Requesting user's loan list...");
 
-  // Obter usuário autenticado
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    throw new Error("Usuário não autenticado.");
-  }
+  if (userError || !user) throw new Error("User not authenticated.");
 
-  // Buscar os empréstimos no Supabase
   const { data, error } = await supabase
     .from("loans")
     .select("*")
@@ -25,11 +17,10 @@ export async function getLoans() {
     .order("borrowed_at", { ascending: false });
 
   if (error) {
-    console.error("❌ Erro ao buscar empréstimos:", error.message);
+    console.error("Error fetching loans:", error.message);
     throw error;
   }
 
-  // 🔹 Buscar dados dos livros na API Gutendex
   const loansWithBooks = await Promise.all(
     (data || []).map(async (loan) => {
       try {
@@ -37,19 +28,15 @@ export async function getLoans() {
         const bookData = await response.json();
         return { ...loan, book: bookData };
       } catch {
-        console.warn(`⚠️ Não foi possível buscar detalhes do livro ${loan.book_id}`);
+        console.warn(`Could not fetch details for book ${loan.book_id}`);
         return { ...loan, book: null };
       }
     })
   );
 
-  console.log("✅ Empréstimos carregados com dados de livros:", loansWithBooks);
   return loansWithBooks;
 }
 
-/**
- * Criar um novo empréstimo (14 dias de duração).
- */
 export async function borrowBook({
   user_id,
   book_id,
@@ -57,9 +44,24 @@ export async function borrowBook({
   user_id: string;
   book_id: string;
 }) {
-  console.log("📤 Criando empréstimo:", { user_id, book_id });
+  console.log("📤 Creating loan:", { user_id, book_id });
 
-  // 1️⃣ Verificar se já existe empréstimo ativo do mesmo livro para o usuário
+  const { data: borrowedBook, error: borrowedError } = await supabase
+    .from("loans")
+    .select("*")
+    .eq("book_id", book_id)
+    .eq("status", "active");
+
+  if (borrowedError) {
+    console.error("Error checking borrowed book:", borrowedError.message);
+    throw borrowedError;
+  }
+
+  if (borrowedBook && borrowedBook.length > 0) {
+    console.warn("Book already borrowed by another user.");
+    throw new Error("This book is already borrowed by another user.");
+  }
+
   const { data: existingLoans, error: checkError } = await supabase
     .from("loans")
     .select("*")
@@ -68,16 +70,15 @@ export async function borrowBook({
     .eq("status", "active");
 
   if (checkError) {
-    console.error("❌ Erro ao verificar empréstimos existentes:", checkError.message);
+    console.error("Error checking existing loans:", checkError.message);
     throw checkError;
   }
 
   if (existingLoans && existingLoans.length > 0) {
-    console.warn("⚠️ Empréstimo duplicado detectado para o mesmo livro.");
-    throw new Error("Este livro já está emprestado para você.");
+    console.warn("Duplicate loan detected for the same book.");
+    throw new Error("You already have an active loan for this book.");
   }
 
-  // 2️⃣ Criar novo empréstimo se não houver ativo
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 14);
 
@@ -96,19 +97,17 @@ export async function borrowBook({
     .single();
 
   if (error) {
-    console.error("❌ Erro Supabase (borrowBook):", error.message);
+    console.error("Supabase error (borrowBook):", error.message);
     throw error;
   }
 
-  console.log("✅ Empréstimo inserido:", data);
+  console.log("Loan created:", data);
   return data;
 }
 
-/**
- * Atualizar empréstimo para status 'returned' e registrar data de devolução.
- */
+
 export async function returnBook({ loan_id }: { loan_id: string }) {
-  console.log("📤 Atualizando status do empréstimo para 'returned':", loan_id);
+  console.log("Updating loan status to 'returned':", loan_id);
 
   const { data, error } = await supabase
     .from("loans")
@@ -121,10 +120,10 @@ export async function returnBook({ loan_id }: { loan_id: string }) {
     .single();
 
   if (error) {
-    console.error("❌ Erro Supabase (returnBook):", error.message);
+    console.error("Supabase error (returnBook):", error.message);
     throw error;
   }
 
-  console.log("✅ Empréstimo devolvido:", data);
+  console.log("Loan returned:", data);
   return data;
 }

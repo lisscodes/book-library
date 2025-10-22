@@ -18,60 +18,48 @@ export default function BookDetails() {
     (state: RootState) => state.books
   );
 
-  // 🔹 Buscar detalhes do livro
   useEffect(() => {
     if (id) {
       dispatch(fetchBookById(Number(id)));
     }
   }, [dispatch, id]);
 
-  // ======================================================
-  // 🔹 Empréstimo
-  // ======================================================
   const handleLoan = async () => {
-  if (!book) return;
+    if (!book) return;
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    toast.error("É necessário estar logado para emprestar livros.");
-    console.error("Usuário não autenticado:", authError);
-    return;
-  }
+    if (authError || !user) {
+      toast.error("You need to be logged in to borrow books.");
+      console.error("Unauthenticated user:", authError);
+      return;
+    }
 
-  console.log("📚 Tentando criar empréstimo para:", book.id, "por usuário:", user.id);
+    dispatch(
+      createLoan({
+        user_id: user.id,
+        book_id: String(book.id),
+      })
+    )
+      .unwrap()
+      .then(() => {
+        toast.success("Book successfully borrowed!");
+        navigate("/loans");
+      })
+      .catch((err) => {
+        console.error("Error creating loan:", err);
+        const message = err?.message || err;
+        if (typeof message === "string" && message.includes("already borrowed")) {
+          toast.warning("You already have an active loan for this book.");
+        } else {
+          toast.error("Failed to borrow the book. Please try again later.");
+        }
+      });
+  };
 
-  dispatch(
-    createLoan({
-      user_id: user.id,
-      book_id: String(book.id),
-    })
-  )
-    .unwrap()
-    .then((res) => {
-      console.log("Empréstimo criado com sucesso:", res);
-      toast.success("Livro emprestado com sucesso!");
-      navigate("/loans");
-    })
-    .catch((err) => {
-      console.error("Erro ao criar empréstimo:", err);
-
-      const message = err?.message || err;
-
-      if (typeof message === "string" && message.includes("já está emprestado")) {
-        toast.warning("Você já possui um empréstimo ativo deste livro.");
-      } else {
-        toast.error("Falha ao registrar o empréstimo. Tente novamente mais tarde.");
-      }
-    });
-};
-
-  // ======================================================
-  // 🔹 Lista de Espera
-  // ======================================================
   const handleWaitlist = async () => {
     if (!book) return;
 
@@ -81,12 +69,10 @@ export default function BookDetails() {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      toast.error("É necessário estar logado para entrar na lista de espera.");
-      console.error("Usuário não autenticado:", authError);
+      toast.error("You need to be logged in to join the waitlist.");
+      console.error("Unauthenticated user:", authError);
       return;
     }
-
-    console.log("🕒 Tentando adicionar à lista de espera:", book.id);
 
     dispatch(
       joinWaitlist({
@@ -95,20 +81,16 @@ export default function BookDetails() {
       })
     )
       .unwrap()
-      .then((res) => {
-        console.log("✅ Adicionado à lista de espera:", res);
-        toast.info("🕒 Livro adicionado à lista de espera!");
+      .then(() => {
+        toast.info("Book added to the waitlist!");
         navigate("/waitlist");
       })
       .catch((err) => {
-        console.error("❌ Erro ao adicionar à lista de espera:", err);
-        toast.error("Falha ao entrar na lista de espera.");
+        console.error("Error joining waitlist:", err);
+        toast.error("Failed to join the waitlist.");
       });
   };
 
-  // ======================================================
-  // 🔹 Favoritar
-  // ======================================================
   const handleFavorite = async () => {
     if (!book) return;
 
@@ -118,12 +100,10 @@ export default function BookDetails() {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      toast.error("É necessário estar logado para favoritar livros.");
-      console.error("Usuário não autenticado:", authError);
+      toast.error("You need to be logged in to favorite books.");
+      console.error("Unauthenticated user:", authError);
       return;
     }
-
-    console.log("💜 Tentando favoritar livro:", book.id);
 
     dispatch(
       toggleFavorite({
@@ -132,24 +112,20 @@ export default function BookDetails() {
       })
     )
       .unwrap()
-      .then((res) => {
-        console.log("✅ Favorito atualizado:", res);
-        toast.success("💜 Favoritos atualizados!");
+      .then(() => {
+        toast.success("Favorites updated!");
       })
       .catch((err) => {
-        console.error("❌ Erro ao atualizar favorito:", err);
-        toast.error("Falha ao atualizar favorito.");
+        console.error("Error updating favorite:", err);
+        toast.error("Failed to update favorites.");
       });
   };
 
-  // ======================================================
-  // 🔹 Estados de carregamento e erro
-  // ======================================================
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-purple-100">
         <p className="text-purple-600 text-lg font-medium">
-          Carregando detalhes do livro...
+          Loading book details...
         </p>
       </div>
     );
@@ -158,7 +134,7 @@ export default function BookDetails() {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-purple-100">
-        <p className="text-red-600 text-lg font-semibold">Erro: {error}</p>
+        <p className="text-red-600 text-lg font-semibold">Error: {error}</p>
       </div>
     );
   }
@@ -167,18 +143,15 @@ export default function BookDetails() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-purple-100">
         <p className="text-gray-700 text-lg font-medium">
-          Livro não encontrado.
+          Book not found.
         </p>
       </div>
     );
   }
 
-  // ======================================================
-  // 🔹 Renderização principal
-  // ======================================================
   const coverUrl =
     book.formats["image/jpeg"] ||
-    "https://via.placeholder.com/150x220?text=Sem+Capa";
+    "https://via.placeholder.com/150x220?text=No+Cover";
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-purple-100 p-6">
@@ -193,7 +166,7 @@ export default function BookDetails() {
 
         {book.authors?.length > 0 && (
           <p className="text-lg text-purple-600 mb-2">
-            por {book.authors.map((a) => a.name).join(", ")}
+            by {book.authors.map((a) => a.name).join(", ")}
           </p>
         )}
 
@@ -208,21 +181,21 @@ export default function BookDetails() {
             onClick={handleLoan}
             className="bg-purple-600 text-white px-6 py-2 rounded-xl hover:bg-purple-700 transition"
           >
-            📚 Emprestar
+            📚 Borrow
           </button>
 
           <button
             onClick={handleWaitlist}
             className="bg-yellow-500 text-white px-6 py-2 rounded-xl hover:bg-yellow-600 transition"
           >
-            🕒 Lista de espera
+            🕒 Waitlist
           </button>
 
           <button
             onClick={handleFavorite}
             className="border-2 border-purple-500 text-purple-700 px-6 py-2 rounded-xl hover:bg-purple-50 transition"
           >
-            💜 Favoritar
+            💜 Favorite
           </button>
         </div>
       </div>

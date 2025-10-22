@@ -25,16 +25,16 @@ export default function FavoriteBooks() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        toast.error("É necessário estar logado para remover favoritos.");
+        toast.error("You must be logged in to remove favorites.");
         return;
       }
 
       await dispatch(toggleFavorite({ user_id: user.id, book_id: bookId })).unwrap();
-      toast.info("Livro removido dos favoritos.");
+      toast.info("Book removed from favorites.");
       dispatch(fetchFavorites());
     } catch (err) {
-      console.error("Erro ao remover favorito:", err);
-      toast.error("Falha ao remover o favorito.");
+      console.error("Error removing favorite:", err);
+      toast.error("Failed to remove favorite.");
     }
   };
 
@@ -51,7 +51,7 @@ export default function FavoriteBooks() {
   if (error) {
     return (
       <div className="text-center text-red-500 mt-6">
-        Ocorreu um erro ao carregar seus favoritos.
+        An error occurred while loading your favorites.
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function FavoriteBooks() {
   if (!items.length) {
     return (
       <div className="text-center text-gray-500 mt-6">
-        Você ainda não tem livros favoritados.
+        You don’t have any favorite books yet.
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function FavoriteBooks() {
   return (
     <div className="p-6 min-h-screen bg-purple-50 pb-20 md:pb-6">
       <h2 className="text-3xl font-bold mb-6 text-center text-purple-700">
-        Meus Favoritos
+        My Favorites
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -99,7 +99,7 @@ export default function FavoriteBooks() {
                 onClick={() => handleRemove(String(book.id))}
                 className="mt-3 bg-purple-600 text-white text-sm sm:text-base px-4 py-1.5 rounded-lg hover:bg-purple-700 transition"
               >
-                Remover
+                Remove
               </button>
             </div>
           );

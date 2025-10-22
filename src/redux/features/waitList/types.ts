@@ -5,5 +5,5 @@ export interface WaitlistEntry {
   user_id: string;
   book_id: string;
   created_at?: string;
-  book?: Book;
+  book?: Book | null;
 }

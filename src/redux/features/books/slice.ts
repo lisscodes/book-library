@@ -6,6 +6,11 @@ const initialState: BooksState = {
   books: [],
   isLoading: false,
   searchQuery: "",
+  language: "",
+  topic: "",
+  sort: "",
+  next: null,
+  previous: null,
   error: null,
   selectedBook: null,
 };
@@ -17,8 +22,24 @@ const booksSlice = createSlice({
     setQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload || "";
     },
+    setLanguage: (state, action: PayloadAction<string>) => {
+      state.language = action.payload;
+    },
+    setTopic: (state, action: PayloadAction<string>) => {
+      state.topic = action.payload;
+    },
+    setSort: (state, action: PayloadAction<string>) => {
+      state.sort = action.payload;
+    },
     clearSelectedBook: (state) => {
       state.selectedBook = null;
+    },
+    setPagination: (
+      state,
+      action: PayloadAction<{ next: string | null; previous: string | null }>
+    ) => {
+      state.next = action.payload.next;
+      state.previous = action.payload.previous;
     },
   },
   extraReducers: (builder) => {
@@ -46,9 +67,17 @@ const booksSlice = createSlice({
       .addCase(fetchBookById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload ?? "Fetch by ID failed";
-      })
+      });
   },
 });
 
-export const { setQuery } = booksSlice.actions;
+export const {
+  setQuery,
+  setLanguage,
+  setTopic,
+  setSort,
+  clearSelectedBook,
+  setPagination,
+} = booksSlice.actions;
+
 export default booksSlice.reducer;

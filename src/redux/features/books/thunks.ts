@@ -1,12 +1,35 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Book } from "./types";
+import type { RootState } from "../../store";
 
-export const fetchBooks = createAsyncThunk<Book[], void, { rejectValue: string }>(
+export const fetchBooks = createAsyncThunk<
+  Book[],
+  string | undefined,
+  { state: RootState; rejectValue: string }
+>(
   "books/fetchBooks",
-  async (_, thunkAPI) => {
+  async (url, thunkAPI) => {
+    const { searchQuery, language, topic, sort } = thunkAPI.getState().books;
+
     try {
-      const res = await fetch("https://gutendex.com/books/");
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("search", searchQuery);
+      if (language) params.append("languages", language);
+      if (topic) params.append("topic", topic);
+      if (sort) params.append("sort", sort);
+
+      // 🔹 Define a URL de busca
+      const fetchUrl = url
+        ? url
+        : `https://gutendex.com/books?${params.toString()}`;
+
+      const res = await fetch(fetchUrl);
       const data = await res.json();
+
+      thunkAPI.dispatch({
+        type: "books/setPagination",
+        payload: { next: data.next, previous: data.previous },
+      });
 
       if (!Array.isArray(data.results)) {
         return thunkAPI.rejectWithValue("Invalid data format");

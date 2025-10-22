@@ -19,8 +19,8 @@ export default function Loans() {
   const handleReturn = (loanId: string) => {
     dispatch(returnLoan({ loan_id: loanId }))
       .unwrap()
-      .then(() => toast.success("Livro devolvido com sucesso!"))
-      .catch(() => toast.error("Falha ao devolver o livro."));
+      .then(() => toast.success("Book successfully returned!"))
+      .catch(() => toast.error("Failed to return the book."));
   };
 
   if (loading) {
@@ -36,7 +36,7 @@ export default function Loans() {
   if (error) {
     return (
       <div className="text-center text-red-500 mt-6">
-        Erro ao carregar empréstimos: {error}
+        Error loading loans: {error}
       </div>
     );
   }
@@ -44,7 +44,7 @@ export default function Loans() {
   if (!items.length) {
     return (
       <div className="text-center text-gray-500 mt-6">
-        Você ainda não possui empréstimos registrados.
+        You don’t have any registered loans yet.
       </div>
     );
   }
@@ -52,10 +52,10 @@ export default function Loans() {
   return (
     <div className="p-6 min-h-screen bg-purple-50 pb-20 md:pb-6">
       <h2 className="text-3xl font-bold mb-6 text-center text-purple-700">
-        Meus Empréstimos
+        My Loans
       </h2>
 
-      {/* Grid responsiva */}
+      {/* Responsive grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {items.map((loan, index) =>
           loan.book ? (
@@ -63,12 +63,12 @@ export default function Loans() {
               key={loan.id}
               className="bg-white shadow-lg rounded-xl p-4 flex flex-col items-center text-center gap-3 relative"
             >
-              {/* Capa do livro */}
+              {/* Book cover */}
               <div className="w-full max-w-[150px] sm:max-w-[180px]">
                 <BookCard book={loan.book} index={index} onClick={() => {}} />
               </div>
 
-              {/* Status e detalhes */}
+              {/* Status and details */}
               <div className="mt-3 flex flex-col items-center w-full">
                 <p className="text-sm sm:text-base text-gray-600">
                   Status:{" "}
@@ -79,24 +79,24 @@ export default function Loans() {
                         : "text-green-600 font-semibold"
                     }
                   >
-                    {loan.status === "active" ? "Ativo" : "Devolvido"}
+                    {loan.status === "active" ? "Active" : "Returned"}
                   </span>
                 </p>
 
                 {loan.due_date && loan.status === "active" && (
                   <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    Devolver até:{" "}
-                    {new Date(loan.due_date).toLocaleDateString("pt-BR")}
+                    Return by:{" "}
+                    {new Date(loan.due_date).toLocaleDateString("en-US")}
                   </p>
                 )}
 
-                {/* Botão de devolução */}
+                {/* Return button */}
                 {loan.status === "active" && (
                   <button
                     onClick={() => handleReturn(loan.id)}
                     className="mt-3 bg-purple-600 text-white text-sm sm:text-base px-4 py-1.5 rounded-lg hover:bg-purple-700 transition"
                   >
-                    Devolver
+                    Return
                   </button>
                 )}
               </div>
@@ -106,7 +106,7 @@ export default function Loans() {
               key={loan.id}
               className="bg-gray-100 rounded-lg p-4 text-center text-gray-500"
             >
-              Livro {loan.book_id} (dados indisponíveis)
+              Book {loan.book_id} (data unavailable)
             </div>
           )
         )}

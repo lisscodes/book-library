@@ -15,6 +15,11 @@ export interface BooksState {
   books: Book[];
   isLoading: boolean;
   searchQuery: string;
+  language: string;
+  topic: string;
+  sort: string;
+  next: string | null;
+  previous: string | null;
   error: string | null;
   selectedBook: Book | null;
 }
